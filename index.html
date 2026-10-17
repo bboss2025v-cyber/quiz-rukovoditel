@@ -84,7 +84,7 @@ p { margin: 0; }
 <div class="wrap" id="app"></div>
 
 <script>
-var LINK = "https://max.ru/join/57RA70Bwv_W4ezGefmBLm5wC8yEP-mPLcURfgaKTl9I";
+var LINK = "https://t.me/alexander_traffic_biz";
 
 /* Подключение к Telegram: если квиз открыт внутри бота, он раскрывается на весь экран
    и берёт светлую или тёмную тему из Telegram. Вне Telegram всё работает как обычная страница. */
@@ -243,15 +243,15 @@ function showResult() {
   a.href = LINK;
   a.target = "_blank";
   a.rel = "noopener noreferrer";
-  /* Внутри Telegram внешние ссылки открываем его собственным способом */
+  /* Внутри Telegram ссылку на t.me открываем средствами самого Telegram */
   if (tg && tg.initData) {
     a.addEventListener("click", function (e) {
       e.preventDefault();
-      try { tg.openLink(LINK); } catch (err) { window.open(LINK, "_blank"); }
+      try { tg.openTelegramLink(LINK); } catch (err) { window.open(LINK, "_blank"); }
     });
   }
   app.appendChild(a);
-  app.appendChild(el("p", "note", "Откроется в MAX"));
+  app.appendChild(el("p", "note", "Откроется в Telegram"));
 
   var again = el("button", "link", "Пройти заново");
   again.type = "button";
