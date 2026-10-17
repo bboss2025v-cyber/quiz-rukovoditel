@@ -1,0 +1,236 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какой вы руководитель</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;600&display=swap">
+<style>
+/* Layout: одна колонка 560px по центру, экраны меняются на месте, крупные кнопки под большой палец */
+:root {
+  --bg: #f2f5f6;
+  --surface: #ffffff;
+  --fg: #14232b;
+  --muted: #55676f;
+  --line: #d5dee1;
+  --accent: #0d6b63;
+  --accent-fg: #ffffff;
+  --warm: #e9a23b;
+  --pick: #e3f1ef;
+  --font-display: "Unbounded", "Onest", system-ui, sans-serif;
+  --font-body: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1a1f; --surface: #172830; --fg: #e8f0f2; --muted: #9bb0b8;
+    --line: #2b414b; --accent: #3fb8aa; --accent-fg: #07201d; --warm: #f0b458; --pick: #1d3d40;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1a1f; --surface: #172830; --fg: #e8f0f2; --muted: #9bb0b8;
+  --line: #2b414b; --accent: #3fb8aa; --accent-fg: #07201d; --warm: #f0b458; --pick: #1d3d40;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.5;
+  margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 32px;
+  min-height: 100vh;
+}
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(24px, 7vw, 34px); }
+h2 { font-size: clamp(20px, 5.6vw, 26px); }
+p { margin: 0; }
+.eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.lead { color: var(--muted); }
+.btn {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  width: 100%; min-height: 58px; padding: 14px 20px; border-radius: 14px; border: 0;
+  background: var(--accent); color: var(--accent-fg);
+  font: 600 17px/1.3 var(--font-body); text-decoration: none; cursor: pointer;
+}
+.btn:hover { filter: brightness(1.06); }
+.btn:focus-visible, .opt:focus-visible, .link:focus-visible { outline: 3px solid var(--warm); outline-offset: 2px; }
+.link { background: none; border: 0; color: var(--muted); font: 500 15px var(--font-body); padding: 12px 4px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; align-self: flex-start; }
+.progress { display: flex; flex-direction: column; gap: 8px; }
+.progress-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--muted); font-weight: 500; }
+.bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--warm); border-radius: 3px; transition: width .25s ease; }
+.opts { display: flex; flex-direction: column; gap: 12px; }
+.opt {
+  width: 100%; min-height: 64px; padding: 14px 18px; text-align: left;
+  background: var(--surface); color: var(--fg); border: 2px solid var(--line); border-radius: 14px;
+  font: 500 17px/1.35 var(--font-body); cursor: pointer;
+}
+.opt:hover { border-color: var(--accent); }
+.opt.picked { border-color: var(--accent); background: var(--pick); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; }
+.advice { border-left: 4px solid var(--warm); padding-left: 14px; }
+.advice b { display: block; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+.note { font-size: 14px; color: var(--muted); text-align: center; }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+var LINK = "https://max.ru/join/57RA70Bwv_W4ezGefmBLm5wC8yEP-mPLcURfgaKTl9I";
+
+var QUESTIONS = [
+  { q: "Вечер, вы сели ужинать, а телефон мигает. Что делаете?", a: [
+    ["Отвечаю сразу, клиент ждать не должен", "A"],
+    ["Переворачиваю телефон, отвечу утром", "B"],
+    ["Надеюсь, что менеджер уже ответил", "C"] ] },
+  { q: "Сотрудник заболел или ушёл в отпуск. Что с его делами?", a: [
+    ["Забираю всё себе", "A"],
+    ["Часть дел ждёт его возвращения", "B"],
+    ["Кто-то подхватывает, но не всё", "C"] ] },
+  { q: "Вы вернулись с обеда, а клиент написал час назад. Что дальше?", a: [
+    ["Извиняюсь и отвечаю быстро", "A"],
+    ["Отвечаю, когда доделаю текущее", "B"],
+    ["Спрашиваю у команды, кто ему отвечал", "C"] ] },
+  { q: "Как вы выбираете, за что взяться первым?", a: [
+    ["Важное делаю сам, так надёжнее", "A"],
+    ["Берусь за то, что горит громче всего", "B"],
+    ["Раздаю задачи, а потом проверяю, что сделано", "C"] ] },
+  { q: "Что мешает передать переписку с клиентами другому?", a: [
+    ["Никто не ответит так, как я", "A"],
+    ["Некогда объяснять и настраивать", "B"],
+    ["Уже передал, но результат не всегда устраивает", "C"] ] },
+  { q: "Что вам было бы приятнее всего через месяц?", a: [
+    ["Чтобы я отвечал реже, а клиенты всё равно получали ответ", "A"],
+    ["Чтобы хватало времени на дела, которые я откладываю", "B"],
+    ["Чтобы вечером никто не оставался без ответа", "C"] ] }
+];
+
+var RESULTS = {
+  A: {
+    title: "Руководитель «сам отвечу»",
+    text: "Вы привыкли, что лучше вас никто не ответит, и клиенты это ценят. Но переписка идёт за ужином и в выходные, а силы уходят на то, что можно передать.",
+    advice: "Выпишите пять вопросов, которые клиенты задают чаще всего, и ваши ответы на них. Это основа для помощника, который будет отвечать вместо вас.",
+    button: "Посмотреть, как агент отвечает вместо вас"
+  },
+  B: {
+    title: "Руководитель «потом разберу»",
+    text: "Вы выбираете главное и откладываете остальное. Когда всё горит, это честный способ выжить. Но сообщения из «потом» остывают быстрее всего: человек не ждёт и пишет другому.",
+    advice: "Пусть на каждое сообщение уходит хотя бы короткий ответ: «Получили, напишем вам сегодня».",
+    button: "Разобрать мою ситуацию"
+  },
+  C: {
+    title: "Руководитель «у меня есть команда»",
+    text: "Вы передали переписку людям, и это разумно. Но люди уходят домой, болеют, отдыхают, а вечерние обращения остаются без ответа. Утром приходится разбирать всё заново.",
+    advice: "Возьмите вчерашнюю переписку и посмотрите, сколько сообщений после конца рабочего дня остались без ответа.",
+    button: "Закрыть вечерние обращения"
+  }
+};
+
+var app = document.getElementById("app");
+var answers = [];
+
+function el(tag, cls, text) {
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+function clear() { while (app.firstChild) app.removeChild(app.firstChild); }
+
+function showStart() {
+  answers = [];
+  clear();
+  app.appendChild(el("p", "eyebrow", "Тест на 6 вопросов"));
+  app.appendChild(el("h1", null, "Какой вы руководитель, когда дело доходит до того, чтобы всё тянуть на себе"));
+  app.appendChild(el("p", "lead", "Ответьте на шесть вопросов про ваш обычный день и узнайте, как вы тянете переписку с клиентами. Займёт около двух минут."));
+  var b = el("button", "btn", "Начать");
+  b.type = "button";
+  b.addEventListener("click", function () { showQuestion(0); });
+  app.appendChild(b);
+}
+
+function showQuestion(i) {
+  clear();
+  var total = QUESTIONS.length;
+  var prog = el("div", "progress");
+  var row = el("div", "progress-row");
+  row.appendChild(el("span", null, "Вопрос " + (i + 1) + " из " + total));
+  prog.appendChild(row);
+  var bar = el("div", "bar");
+  var fill = el("i");
+  fill.style.width = (i / total * 100) + "%";
+  bar.appendChild(fill);
+  prog.appendChild(bar);
+  app.appendChild(prog);
+
+  app.appendChild(el("h2", null, QUESTIONS[i].q));
+
+  var opts = el("div", "opts");
+  QUESTIONS[i].a.forEach(function (opt) {
+    var b = el("button", "opt", opt[0]);
+    b.type = "button";
+    b.addEventListener("click", function () {
+      b.classList.add("picked");
+      fill.style.width = ((i + 1) / total * 100) + "%";
+      answers[i] = opt[1];
+      setTimeout(function () {
+        if (i + 1 < total) showQuestion(i + 1); else showResult();
+      }, 220);
+    });
+    opts.appendChild(b);
+  });
+  app.appendChild(opts);
+
+  if (i > 0) {
+    var back = el("button", "link", "Назад");
+    back.type = "button";
+    back.addEventListener("click", function () { showQuestion(i - 1); });
+    app.appendChild(back);
+  }
+  window.scrollTo(0, 0);
+}
+
+function pickResult() {
+  var count = { A: 0, B: 0, C: 0 };
+  answers.forEach(function (k) { count[k]++; });
+  var max = Math.max(count.A, count.B, count.C);
+  var leaders = ["A", "B", "C"].filter(function (k) { return count[k] === max; });
+  if (leaders.length === 1) return leaders[0];
+  return leaders.indexOf(answers[0]) !== -1 ? answers[0] : leaders[0];
+}
+
+function showResult() {
+  var r = RESULTS[pickResult()];
+  clear();
+  app.appendChild(el("p", "eyebrow", "Ваш результат"));
+  app.appendChild(el("h1", null, r.title));
+
+  var card = el("div", "card");
+  card.appendChild(el("p", null, r.text));
+  var adv = el("div", "advice");
+  adv.appendChild(el("b", null, "Совет"));
+  adv.appendChild(el("p", null, r.advice));
+  card.appendChild(adv);
+  app.appendChild(card);
+
+  var a = el("a", "btn", r.button);
+  a.href = LINK;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  app.appendChild(a);
+  app.appendChild(el("p", "note", "Откроется в MAX"));
+
+  var again = el("button", "link", "Пройти заново");
+  again.type = "button";
+  again.addEventListener("click", showStart);
+  app.appendChild(again);
+  window.scrollTo(0, 0);
+}
+
+showStart();
+</script>
